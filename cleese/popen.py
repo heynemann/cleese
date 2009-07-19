@@ -1,3 +1,5 @@
+#code obtained from http://code.activestate.com/recipes/440554/
+
 import os
 import subprocess
 import errno
