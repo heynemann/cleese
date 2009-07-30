@@ -75,23 +75,3 @@ def test_loop_and_show_log():
 
     assert items_read > 8, "Expected greater than %s, got %s" % (8, items_read)
 
-def __test_can_clone_a_git_repository_and_show_log():
-    repo_url = "git://github.com/heynemann/pyccuracy.git"
-    executer = Executer(command="rm -rf /tmp/pyccuracy && cd /tmp/ && git clone %s" % repo_url)
-    executer.execute()
-    
-    items_read = 0
-    while not executer.poll():
-        print "%d %s" % (items_read, executer.result.log)
-
-        if executer.result.log:
-            items_read += 1
-        time.sleep(0.1)
-
-    print executer.result.log
-    assert executer.result.status == Status.success, \
-                                "Expected status: %s Got: %s" % \
-                                (Status.success, executer.result.status)
-
-    assert items_read > 10, "Expected greater than %s, got %s" % (10, items_read)
-    
