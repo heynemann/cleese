@@ -34,4 +34,7 @@ test: compile
 	@echo "Running unit tests..."
 	@nosetests -s --verbose --with-coverage --cover-package=cleese ${unit_tests_dir} ${functional_tests_dir}
 
-
+deb:
+	mv .git /tmp/cleese_git
+	python -c 'import os;os.system("debuild")'
+	mv /tmp/cleese_git .git
