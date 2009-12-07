@@ -16,8 +16,9 @@
 # limitations under the License.
 
 import time
-from subprocess import PIPE, STDOUT
-from popen import Popen, recv_some
+import os
+from cleese.subprocess import Popen, PIPE, STDOUT
+#from popen import Popen, recv_some
 
 from cleese import Status
 
@@ -29,15 +30,16 @@ class Executer(object):
     def execute(self):
         self.result = ExecuteResult(command=self.command)
         self.result.status = Status.running
-        self.process = Popen (self.command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+        self.process = Process (self.command)
+        self.process.start()
     
     def poll(self):
         exit_code = self.process.poll()
-        self.result.log += recv_some(self.process, e=0)
+        self.result.log += self.process.read_log()
 
         if exit_code is None:
             return False
-        
+
         if int(exit_code) > 0:
             self.result.status = Status.fail
 
@@ -45,9 +47,30 @@ class Executer(object):
             self.result.status = Status.success
 
         self.result.exit_code = exit_code
-        last_log = self.process.communicate()[0]
+        last_log = self.process.process.communicate()[0]
         self.result.log = last_log and last_log or self.result.log
         return exit_code is not None
+
+class Process(object):
+    def __init__(self, command, buffer_size=1):
+        self.command = command
+        self.buffer_size = buffer_size
+
+    def poll(self):
+        if not self.process:
+            return 0
+
+        return self.process.poll()
+
+    def start(self):
+        self.process = Popen(self.command, shell=True, stdout=PIPE, stderr=STDOUT)
+
+    def stop(self):
+        pid = self.process.pid
+        os.kill(pid)
+
+    def read_log(self):
+        return self.process.asyncread()
 
 class ExecuteResult(object):
     def __init__(self, command):
