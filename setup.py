@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from setuptools import setup, find_packages
-from pyccuracy import Version
+from cleese import __version__
 
 #classifier should be changed to "Development Status :: 5 - Production/Stable" soon
 
@@ -42,15 +42,6 @@ setup(
     packages = find_packages(),
     package_dir = {"cleese": "cleese"},
     include_package_data = True,
-    package_data = {
-    },
-
-    install_requires=[
-    ],
-
-    entry_points = {
-    },
-
 )
 
 
