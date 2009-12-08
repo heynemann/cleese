@@ -18,7 +18,6 @@
 import time
 import os
 from cleese.subprocess import Popen, PIPE, STDOUT
-#from popen import Popen, recv_some
 
 from cleese import Status
 
@@ -30,7 +29,7 @@ class Executer(object):
     def execute(self):
         self.result = ExecuteResult(command=self.command)
         self.result.status = Status.running
-        self.process = Process (self.command)
+        self.process = Process (self.command, self.working_dir)
         self.process.start()
     
     def poll(self):
@@ -52,9 +51,10 @@ class Executer(object):
         return exit_code is not None
 
 class Process(object):
-    def __init__(self, command, buffer_size=1):
+    def __init__(self, command, working_dir, buffer_size=1):
         self.command = command
         self.buffer_size = buffer_size
+        self.working_dir = working_dir
 
     def poll(self):
         if not self.process:
@@ -63,7 +63,7 @@ class Process(object):
         return self.process.poll()
 
     def start(self):
-        self.process = Popen(self.command, shell=True, stdout=PIPE, stderr=STDOUT)
+        self.process = Popen(str(self.command), cwd=self.working_dir, shell=True, stdout=PIPE, stderr=STDOUT)
 
     def stop(self):
         pid = self.process.pid
