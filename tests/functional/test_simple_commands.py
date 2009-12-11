@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import time
+import sys
 
 from cleese import Executer, Status
 
@@ -74,4 +75,18 @@ def test_loop_and_show_log():
                                 (Status.success, executer.result.status)
 
     assert items_read > 8, "Expected greater than %s, got %s" % (8, items_read)
+
+def test_very_large_commands():
+    command = "%s -c 'print \"a\" * 1000 * 1000'" % sys.executable
+
+    executer = Executer(command=command)
+    executer.execute()
+
+    while not executer.poll():
+        time.sleep(0.5)
+
+    expected_str = "a" * 1000 * 1000
+    expected_str = expected_str + "\n"
+
+    assert executer.result.log == expected_str, "They differ in length expected %d got %d" % (len(expected_str), len(executer.result.log))
 
