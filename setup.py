@@ -19,7 +19,7 @@ from cleese import __version__
 
 setup(
     name = 'cleese',
-    version = Version,
+    version = __version__,
     description = "cleese is a shell command executer for python applications.",
     long_description = """cleese is a shell command executer for python applications.""",
     keywords = 'Popen process execution',
