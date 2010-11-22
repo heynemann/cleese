@@ -20,3 +20,4 @@ python-build-stamp*
 .coverage
 Pyccuracy.egg-info
 *.egg-info
+*.swp

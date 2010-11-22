@@ -18,4 +18,4 @@
 from cleese.status import Status
 from cleese.executer import Executer
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
