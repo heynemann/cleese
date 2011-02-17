@@ -286,7 +286,7 @@ try:
         print("Child was terminated by signal", -retcode, file=sys.stderr)
     else:
         print("Child returned", retcode, file=sys.stderr)
-except OSError as e:
+except OSError, e:
     print("Execution failed:", e, file=sys.stderr)
 
 
@@ -323,8 +323,19 @@ Popen(["/bin/mycmd", "myarg"], env={"PATH": "/usr/bin"})
 import sys
 mswindows = (sys.platform == "win32")
 
-import io
 import os
+try:
+    import io
+except ImportError:
+    class MockedIo(object):
+        def open(self, *args, **kargs):
+            return os.fdopen(*args, **kargs)
+        
+        def TextIOWrapper(self, buf):
+            return buf
+        
+    io = MockedIo()
+
 import traceback
 import gc
 import signal
@@ -811,9 +822,8 @@ class Popen(object):
             if universal_newlines:
                 self.stderr = io.TextIOWrapper(self.stderr)
 
-
     def _translate_newlines(self, data, encoding):
-        data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        data = data.replace(r"\r\n", r"\n").replace(r"\r", r"\n")
         return data.decode(encoding)
 
 
@@ -931,7 +941,7 @@ class Popen(object):
                 (errCode, written) = WriteFile(x, input)
             except ValueError:
                 return self._close('stdin')
-            except (pywintypes.error, Exception) as why:
+            except (pywintypes.error, Exception), why:
                 if why[0] in (109, errno.ESHUTDOWN):
                     return self._close('stdin')
                 raise
@@ -952,7 +962,7 @@ class Popen(object):
                     (errCode, read) = ReadFile(x, nAvail, None)
             except ValueError:
                 return self._close(which)
-            except (pywintypes.error, Exception) as why:
+            except (pywintypes.error, Exception), why:
                 if why[0] in (109, errno.ESHUTDOWN):
                     return self._close(which)
                 raise
@@ -975,7 +985,7 @@ class Popen(object):
 
             try:
                 written = os.write(self.stdin.fileno(), input)
-            except OSError as why:
+            except OSError, why:
                 if why[0] == errno.EPIPE: #broken pipe
                     return self._close('stdin')
                 raise
@@ -1175,7 +1185,7 @@ class Popen(object):
                                          env,
                                          cwd,
                                          startupinfo)
-            except pywintypes.error as e:
+            except pywintypes.error, e:
                 # Translate pywintypes.error to WindowsError, which is
                 # a subclass of OSError.  FIXME: We should really
                 # translate errno using _sys_errlist (or simliar), but
@@ -1514,7 +1524,7 @@ class Popen(object):
             while read_set or write_set:
                 try:
                     rlist, wlist, xlist = select.select(read_set, write_set, [])
-                except select.error as e:
+                except select.error, e:
                     if e.args[0] == errno.EINTR:
                         continue
                     raise
@@ -1549,9 +1559,9 @@ class Popen(object):
 
             # All data exchanged.  Translate lists into strings.
             if stdout is not None:
-                stdout = b"".join(stdout)
+                stdout = r"".join(stdout)
             if stderr is not None:
-                stderr = b"".join(stderr)
+                stderr = r"".join(stderr)
 
             # Translate newlines, if requested.
             # This also turns bytes into strings.
